@@ -1,6 +1,5 @@
 """ Entry point for obs """
 
-
 import logging
 import concurrent.futures as futures
 
