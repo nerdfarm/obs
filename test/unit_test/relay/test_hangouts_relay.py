@@ -3,6 +3,7 @@ import hangups
 
 from obs.relay.hangouts_relay import HangoutsRelay
 
+
 class TestHangoutsRelay(TestCase):
 
     def test_is_not_duplicate(self):

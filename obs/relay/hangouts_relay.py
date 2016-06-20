@@ -82,14 +82,14 @@ class HangoutsRelay(Relay):
         is not simply an earlier relay_out message.
         """
         return state_update.HasField('event_notification') and \
-               state_update.event_notification.HasField('event') and \
-               state_update.event_notification.event.HasField('self_event_state') and \
-               state_update.event_notification.event.self_event_state.HasField('user_id') and \
-               state_update.event_notification.event.self_event_state.user_id.HasField('chat_id') and \
-               state_update.event_notification.event.HasField('sender_id') and \
-               state_update.event_notification.event.sender_id.HasField('chat_id') and \
-               str(state_update.event_notification.event.self_event_state.user_id.chat_id) != \
-               str(state_update.event_notification.event.sender_id.chat_id)
+            state_update.event_notification.HasField('event') and \
+            state_update.event_notification.event.HasField('self_event_state') and \
+            state_update.event_notification.event.self_event_state.HasField('user_id') and \
+            state_update.event_notification.event.self_event_state.user_id.HasField('chat_id') and \
+            state_update.event_notification.event.HasField('sender_id') and \
+            state_update.event_notification.event.sender_id.HasField('chat_id') and \
+            str(state_update.event_notification.event.self_event_state.user_id.chat_id) != \
+            str(state_update.event_notification.event.sender_id.chat_id)
 
     def relay_out(self, payload):
         """ Builds request to send as Hangouts message """
