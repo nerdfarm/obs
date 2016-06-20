@@ -15,15 +15,17 @@ LOG = logging.getLogger(__name__)
 class HangoutsRelay(Relay):
     """ Hangouts Relay implementation that handles relays to and from an mq service. """
 
-    def __init__(self, auth_token_path, client_id, hangouts_conversation_id, mq_client):
+    RELAY_ARG_WHITELIST = ['auth_token_path', 'relay_client_id', 'hangouts_conversation_id']
+
+    def __init__(self, auth_token_path, relay_client_id, hangouts_conversation_id, mq_client):
         self._auth_token_path = auth_token_path
-        self._client_id = client_id
+        self._relay_client_id = relay_client_id
         self._hangouts_conversation_id = hangouts_conversation_id
         self._mq_client = mq_client
         self._mq_sub_client = self._init_sub_client(self._mq_client)
         super().__init__(options={
             "auth_token_path": auth_token_path,
-            "client_id": client_id,
+            "client_id": relay_client_id,
             "hangouts_conversation_id": hangouts_conversation_id
         })
 

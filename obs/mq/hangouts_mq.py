@@ -15,18 +15,21 @@ LOG = logging.getLogger(__name__)
 class HangoutsMq(Mq):
     """ Wraps Mq methods to create sub and pub mq clients """
 
-    def __init__(self, host, port, mq_sub_client_id, mq_sub_topic, mq_pub_client_id, mq_pub_topic, qos):
-        self._host = host
-        self._port = port
-        self._qos = qos
+    MQ_ARG_WHITELIST = ['mq_host', 'mq_port', 'mq_qos', 'mq_sub_client_id',
+                        'mq_sub_topic', 'mq_pub_client_id', 'mq_pub_topic']
+
+    def __init__(self, mq_host, mq_port, mq_qos, mq_sub_client_id, mq_sub_topic, mq_pub_client_id, mq_pub_topic):
+        self._mq_host = mq_host
+        self._mq_port = mq_port
+        self._mq_qos = mq_qos
         self._mq_pub_client_id = mq_pub_client_id
         self._mq_pub_topic = mq_pub_topic
         self._mq_sub_client_id = mq_sub_client_id
         self._mq_sub_topic = mq_sub_topic
         super().__init__(options={
-            "host": host,
-            "port": port,
-            "qos": qos,
+            "host": mq_host,
+            "port": mq_port,
+            "qos": mq_qos,
             "mq_pub_client_id": mq_pub_client_id,
             "mq_pub_topic": mq_pub_topic,
             "mq_sub_client_id": mq_sub_client_id,
@@ -36,9 +39,9 @@ class HangoutsMq(Mq):
     def sub_client(self, on_relay_out):
         """ Return a new Hangouts mq sub client """
         return HangoutsSubMq(
-            host=self._host,
-            port=self._port,
-            qos=self._qos,
+            host=self._mq_host,
+            port=self._mq_port,
+            qos=self._mq_qos,
             mq_client_id=self._mq_sub_client_id,
             mq_topic=self._mq_sub_topic,
             on_relay_out=on_relay_out
@@ -47,9 +50,9 @@ class HangoutsMq(Mq):
     def pub_client(self, payload):
         """ Return a new Hangouts mq pub client """
         return HangoutsPubMq(
-            host=self._host,
-            port=self._port,
-            qos=self._qos,
+            host=self._mq_host,
+            port=self._mq_port,
+            qos=self._mq_qos,
             mq_topic=self._mq_pub_topic,
             mq_client_id=self._mq_pub_client_id,
             payload=payload

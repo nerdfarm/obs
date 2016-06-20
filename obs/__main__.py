@@ -1,15 +1,16 @@
 """ Entry point for obs """
 
+import sys
+import getopt
 import logging
 import concurrent.futures as futures
 
-from .mq.hangouts_mq import HangoutsMq
-from .relay.hangouts_relay import HangoutsRelay
+import obs.config as ObsConfig
 
 LOG = logging.getLogger(__name__)
 
 
-def main():
+def main(argv):
     """ Main obs entrypoint """
 
     logging.basicConfig(
@@ -17,31 +18,19 @@ def main():
         format='[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s'
     )
 
-    LOG.info("Init hangouts_mq")
-    hangouts_mq = HangoutsMq(
-        host="localhost",
-        port=1883,
-        qos=2,
-        mq_pub_client_id="hangouts_pub_client",
-        mq_pub_topic="obs/hangouts_to_pub",
-        mq_sub_client_id="hangouts_sub_client",
-        mq_sub_topic="obs/hangouts_to_sub"
-    )
+    try:
+        _, args = getopt.getopt(argv, "c", ["config"])
 
-    LOG.info("Init hangouts_relay")
-    hangouts_relay = HangoutsRelay(
-        auth_token_path="",
-        client_id="hangouts_relay",
-        hangouts_conversation_id="",
-        mq_client=hangouts_mq
-    )
+        LOG.info("Loading config.yml from: %s", args[0])
+        relays = ObsConfig.parse_obs_config(args[0])
 
-    LOG.info("hangouts_relay connect")
-
-    tpe = futures.ThreadPoolExecutor(max_workers=24)
-    relay_futures = tpe.map(lambda relay: relay.run(), [hangouts_relay])
-    futures.wait(list(relay_futures))
+        tpe = futures.ThreadPoolExecutor(max_workers=24)
+        relay_futures = tpe.map(lambda relay: relay.run(), relays)
+        futures.wait(list(relay_futures))
+    except getopt.GetoptError as error:
+        LOG.error("Must supply config YAML path as first argument: %s", error)
+        sys.exit(2)
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
