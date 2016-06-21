@@ -1,0 +1,39 @@
+### Python ###
+__pycache__/
+*.py[cod]
+*$py.class
+
+.Python
+env/
+build/
+develop-eggs/
+dist/
+eggs/
+.eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+.env
+
+
+### Intellij ###
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+### Mac OSX + Windows ###
+.DS_Store
+Thumbs.db
+
+### SublimeText + TextMate ###
+*.sublime-workspace
+*.sublime-project
+*.tmproj
+*.tmproject
+
+### Vim ###
+*.sw[opnm]
+
+.factorypath
