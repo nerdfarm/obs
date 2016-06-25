@@ -1,7 +1,9 @@
 """ Config parsing for yaml -> Relays and mq clients """
 
+import os
 import importlib
 import logging
+
 import yaml
 
 LOG = logging.getLogger(__name__)
@@ -9,7 +11,7 @@ LOG = logging.getLogger(__name__)
 
 def parse_obs_config(path_to_yaml):
     """ Method to parse relays and mq clients directly from yaml """
-    with open(path_to_yaml, 'r') as stream:
+    with open(os.path.expanduser(path_to_yaml), 'r') as stream:
         try:
             parsed_yaml = yaml.load(stream)
             return [_build_relay(relay) for relay in parsed_yaml["relay"]]
