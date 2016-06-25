@@ -1,3 +1,15 @@
 machine:
   python:
-    version: 3.5.1
+    version: 3.4.2
+
+dependencies:
+  pre:
+    - sudo apt-get install mosquitto
+  post:
+    - mosquitto -d
+    - scp -P $HANGOUTS_AUTH_TOKEN_PORT $HANGOUTS_AUTH_TOKEN_USER@$HANGOUTS_AUTH_TOKEN_HOST:$HANGOUTS_AUTH_TOKEN_LOCATION ~
+    - scp -P $TEST_CONFIG_PORT $TEST_CONFIG_USER@$TEST_CONFIG_HOST:$TEST_CONFIG_LOCATION ~
+
+test:
+  override:
+    - python3 -m nose
