@@ -7,9 +7,8 @@ relay:
     mq_host: "localhost"
     mq_port: 1883
     mq_qos: 2
-    mq_pub_client_id: "hangouts_pub_client"
+    mq_client_id: "hangouts_client"
     mq_pub_topic: "obs/hangouts_to_pub"
-    mq_sub_client_id: "hangouts_sub_client"
     mq_sub_topic: "obs/hangouts_to_sub"
-    auth_token_path: ""
-    hangouts_conversation_id: ""
+    auth_token_path: "a_path"
+    hangouts_conversation_id: "an_id"

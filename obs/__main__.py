@@ -24,13 +24,20 @@ def main(argv):
     try:
         _, args = getopt.getopt(argv, "c", ["config"])
 
+        if len(args) == 0:
+            raise Exception("Please provide a path to config.yml as an argument")
+
         LOG.info("Loading config.yml from: %s", args[0])
         relays = ObsConfig.parse_obs_config(args[0])
+        LOG.info("Parsed %s %s", str(len(relays)), "relay" if len(relays) == 1 else "relays")
         relay_futures = tpe.map(lambda relay: relay.run(), relays)
         futures.wait(list(relay_futures))
     except getopt.GetoptError as error:
         LOG.error("Must supply config YAML path as first argument: %s", error)
+    except Exception as e:
+        LOG.error("Caught exeption: %s", e)
     finally:
+        LOG.info("Shutting down")
         tpe.shutdown(False)
         os.kill(os.getpid(), signal.SIGUSR1)
 
