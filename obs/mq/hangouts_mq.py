@@ -30,7 +30,7 @@ class HangoutsMq(Mq):
         """ Subscribe mosquitto mq client """
         try:
             self._mq_client.on_connect = self._on_connect
-            self._mq_client.on_message = functools.partial(self._on_message, on_relay_out=on_relay_out)
+            self._mq_client.on_message = functools.partial(HangoutsMq._on_message, on_relay_out=on_relay_out)
             connect_status = self._mq_client.connect(self._mq_host, port=self._mq_port)
             LOG.info("MQ connection status: %s", str(connect_status))
             subscribe_status = self._mq_client.subscribe(topic=self._mq_sub_topic, qos=self._mq_qos)
@@ -57,7 +57,8 @@ class HangoutsMq(Mq):
         LOG.info("Subscribed to mqtt host at: %s:%s, topic: %s, mq_client_id: %s, granted_qos: %s",
                  self._mq_host, str(self._mq_port), self._mq_sub_topic, self._mq_client_id, granted_qos)
 
-    def _on_message(self, client, user_data, msg, on_relay_out):
+    @staticmethod
+    def _on_message(client, user_data, msg, on_relay_out):
         """ Relay a mosquitto mq event out """
         LOG.info("Received a message from topic: %s", msg.topic)
         on_relay_out({"message": msg.payload.decode(encoding='utf-8', errors='ignore')})

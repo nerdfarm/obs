@@ -34,8 +34,8 @@ def main(argv):
         futures.wait(list(relay_futures))
     except getopt.GetoptError as error:
         LOG.error("Must supply config YAML path as first argument: %s", error)
-    except Exception as e:
-        LOG.error("Caught exeption: %s", e)
+    except Exception as exception:
+        LOG.error("Caught exeption: %s", exception)
     finally:
         LOG.info("Shutting down")
         tpe.shutdown(False)
