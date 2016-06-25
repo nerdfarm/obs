@@ -4,8 +4,7 @@
 class Relay(object):
     """ Base Relay Client API """
 
-    def __init__(self, options, *args, **kwargs):
-        self.options = options
+    def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
 

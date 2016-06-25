@@ -22,22 +22,17 @@ class HangoutsRelay(Relay):
         self._relay_client_id = relay_client_id
         self._hangouts_conversation_id = hangouts_conversation_id
         self._mq_client = mq_client
-        self._mq_sub_client = self._init_sub_client(self._mq_client)
-        super().__init__(options={
-            "auth_token_path": auth_token_path,
-            "client_id": relay_client_id,
-            "hangouts_conversation_id": hangouts_conversation_id
-        })
+        super(HangoutsRelay, self).__init__()
 
-    def _init_sub_client(self, mq_client):
+    def _init_sub_client(self):
         """ Initialize the mq subscribing client """
-        return mq_client.sub_client(on_relay_out=self.relay_out)
+        self._mq_client.subscribe(on_relay_out=self.relay_out)
 
     def run(self):
         """
-        Called to run this module, delegates to a connect. This is blocking for the life of the application in order to
-        keep clients alive
+        Called to run this module. This is blocking for the life of the application in order to keep clients alive
         """
+        self._init_sub_client()
         self._connect()
 
     def _connect(self):
@@ -120,6 +115,6 @@ class HangoutsRelay(Relay):
         """ Publishing client that publishes and disconnects from mq service """
         LOG.info("relay_in for payload")
         if self.client:
-            self._mq_client.pub_client(payload).publish()
+            self._mq_client.publish(payload)
         else:
             raise Exception("Relay has not yet been run, call run()")

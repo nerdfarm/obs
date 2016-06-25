@@ -4,8 +4,7 @@
 class Mq(object):
     """ Base API for obs messaging brokering """
 
-    def __init__(self, options, *args, **kwargs):
-        self.options = options
+    def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
 
