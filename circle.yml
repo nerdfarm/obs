@@ -19,4 +19,4 @@ test:
     - mkdir -p $CIRCLE_TEST_REPORTS/django
     - mosquitto -d -c ~/$MOSQUITTO_CONF > /dev/null 2>&1
   override:
-    - python3 -m nose --with-xunit --xunit-file=$CIRCLE_TEST_REPORTS/django
+    - python3 -m nose --with-xunit --xunit-file=$CIRCLE_TEST_REPORTS/django/nosetests.xml
