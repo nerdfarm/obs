@@ -5,11 +5,14 @@ machine:
 dependencies:
   pre:
     - sudo apt-get install mosquitto
+    - sudo apt-get install mosquitto-clients
   post:
     - mosquitto -d
-    - scp -P $HANGOUTS_AUTH_TOKEN_PORT $HANGOUTS_AUTH_TOKEN_USER@$HANGOUTS_AUTH_TOKEN_HOST:$HANGOUTS_AUTH_TOKEN_LOCATION ~
-    - scp -P $TEST_CONFIG_PORT $TEST_CONFIG_USER@$TEST_CONFIG_HOST:$TEST_CONFIG_LOCATION ~
+    - scp -P $HANGOUTS_AUTH_TOKEN_PORT $HANGOUTS_AUTH_TOKEN_USER@$HANGOUTS_AUTH_TOKEN_HOST:$HANGOUTS_AUTH_TOKEN_DIR/$HANGOUTS_AUTH_TOKEN_NAME ~ > /dev/null 2>&1
+    - scp -P $HANGOUTS_AUTH_TOKEN_PORT $HANGOUTS_AUTH_TOKEN_USER@$HANGOUTS_AUTH_TOKEN_HOST:$HANGOUTS_AUTH_TOKEN_DIR/$TEST_HANGOUTS_AUTH_TOKEN_NAME ~ > /dev/null 2>&1
+    - scp -P $TEST_CONFIG_PORT $TEST_CONFIG_USER@$TEST_CONFIG_HOST:$TEST_CONFIG_DIR/$TEST_CONFIG_NAME ~ > /dev/null 2>&1
 
 test:
   override:
     - python3 -m nose
+    - python3 -m test.integration_test.ete_mosquitto_hangouts --config="~/$TEST_CONFIG_NAME" --auth_token_path="~/$TEST_HANGOUTS_AUTH_TOKEN_NAME" --conversation_id="$HANGOUTS_CONVERSATION_ID"
