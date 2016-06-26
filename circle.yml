@@ -16,7 +16,7 @@ dependencies:
 
 test:
   pre:
-    - mosquitto -d -c ~/$MOSQUITTO_CONF
-#  override:
-#    - python3 -m nose
-#    - python3 -m test.integration_test.ete_mosquitto_hangouts --config="~/$TEST_CONFIG_NAME" --auth_token_path="~/$TEST_HANGOUTS_AUTH_TOKEN_NAME" --conversation_id="$HANGOUTS_CONVERSATION_ID"
+    - mkdir -p $CIRCLE_TEST_REPORTS/django
+    - mosquitto -d -c ~/$MOSQUITTO_CONF > /dev/null 2>&1
+  override:
+    - python3 -m nose --with-xunit --xunit-file=$CIRCLE_TEST_REPORTS/django
