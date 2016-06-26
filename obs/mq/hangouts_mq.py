@@ -28,6 +28,7 @@ class HangoutsMq(Mq):
 
     def subscribe(self, on_relay_out):
         """ Subscribe mosquitto mq client """
+        LOG.info("Subscribing from mq client")
         try:
             self._mq_client.on_connect = self._on_connect
             self._mq_client.on_message = functools.partial(HangoutsMq._on_message, on_relay_out=on_relay_out)
@@ -40,6 +41,7 @@ class HangoutsMq(Mq):
             LOG.error("Failed to connect and/or subscribe to mqtt: %s", e)
 
     def unsubscribe(self):
+        LOG.info("Unsubscribing from mq client")
         try:
             self._mq_client.unsubscribe(self._mq_sub_topic)
             self._mq_client.loop_stop()
