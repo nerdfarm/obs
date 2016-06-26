@@ -46,6 +46,8 @@ def main(argv):
 
 
 def parse_config_args(argv, long_opts):
+    """ Parses passed in args into a dict """
+
     parsed_args = {}
     options, _ = getopt.getopt(argv, shortopts='', longopts=long_opts)
     for option in options:
@@ -55,12 +57,12 @@ def parse_config_args(argv, long_opts):
                     LOG.info("Found path: %s", option[1])
                     parsed_args[option[0]] = option[1]
                 else:
-                    LOG.warn("Found duplicate, rejecting: {'%s': '%s'}, current parsed_args: %s",
-                             option[0], option[1], str(parsed_args))
+                    LOG.warning("Found duplicate, rejecting: {'%s': '%s'}, current parsed_args: %s",
+                                option[0], option[1], str(parsed_args))
             else:
                 raise RuntimeError("Found config key: %s, but no value: %s", option[0], option[1])
         else:
-            LOG.warn("Ignoring unused option: %s", str(option))
+            LOG.warning("Ignoring unused option: %s", str(option))
     return parsed_args
 
 
