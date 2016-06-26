@@ -110,7 +110,7 @@ def assert_message(client, user_data, msg, message2):
         LOG.info("Message success, received_message: %s, message to compare to: %s", received_message, message2)
         os._exit(0)
     else:
-        raise AssertionError("Message1: %s, and Message2: %s differ", msg, message2)
+        raise AssertionError("Message1: %s, and Message2: %s differ", received_message, message2)
 
 
 if __name__ == "__main__":
