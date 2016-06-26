@@ -1,9 +1,12 @@
 from unittest import TestCase
+
 import hangups
+from nose.plugins.attrib import attr
 
 from obs.relay.hangouts_relay import HangoutsRelay
 
 
+@attr(speed='fast')
 class TestHangoutsRelay(TestCase):
 
     def test_is_not_duplicate(self):

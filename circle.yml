@@ -1,3 +1,30 @@
 machine:
   python:
-    version: 3.5.1
+    version: 3.4.2
+
+dependencies:
+  pre:
+    - sudo add-apt-repository ppa:mosquitto-dev/mosquitto-ppa -y
+    - sudo apt-get update
+    - sudo apt-get install mosquitto
+    - sudo apt-get install mosquitto-clients
+  post:
+    - scp -P $HANGOUTS_AUTH_TOKEN_PORT $HANGOUTS_AUTH_TOKEN_USER@$HANGOUTS_AUTH_TOKEN_HOST:$HANGOUTS_AUTH_TOKEN_DIR/$HANGOUTS_AUTH_TOKEN_NAME ~ > /dev/null 2>&1
+    - scp -P $HANGOUTS_AUTH_TOKEN_PORT $HANGOUTS_AUTH_TOKEN_USER@$HANGOUTS_AUTH_TOKEN_HOST:$HANGOUTS_AUTH_TOKEN_DIR/$TEST_HANGOUTS_AUTH_TOKEN_NAME ~ > /dev/null 2>&1
+    - scp -P $TEST_CONFIG_PORT $TEST_CONFIG_USER@$TEST_CONFIG_HOST:$TEST_CONFIG_DIR/$TEST_CONFIG_NAME ~ > /dev/null 2>&1
+    - scp -P $TEST_CONFIG_PORT $TEST_CONFIG_USER@$TEST_CONFIG_HOST:$TEST_CONFIG_DIR/$MOSQUITTO_CONF ~ > /dev/null 2>&1
+
+test:
+  pre:
+    - mkdir -p $CIRCLE_TEST_REPORTS/django
+    - pip install wheel
+    - pip install pylint
+    - mosquitto -d -c ~/$MOSQUITTO_CONF > /dev/null 2>&1
+  override:
+    - nosetests -a speed=fast --with-xunit --xunit-file=$CIRCLE_TEST_REPORTS/django/nosetests_fast.xml
+    - nosetests -a speed=slow --with-xunit --xunit-file=$CIRCLE_TEST_REPORTS/django/nosetests_slow.xml
+  post:
+    - pylint obs --rcfile=.config/pylintrc
+    - python3 setup.py bdist_wheel
+    - mkdir -p $CIRCLE_ARTIFACTS/dist
+    - cp dist/* $CIRCLE_ARTIFACTS/dist
