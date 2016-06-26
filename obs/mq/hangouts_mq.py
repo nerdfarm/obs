@@ -28,6 +28,7 @@ class HangoutsMq(Mq):
 
     def subscribe(self, on_relay_out):
         """ Subscribe mosquitto mq client """
+        LOG.info("Subscribing from mq client")
         try:
             self._mq_client.on_connect = self._on_connect
             self._mq_client.on_message = functools.partial(HangoutsMq._on_message, on_relay_out=on_relay_out)
@@ -40,6 +41,7 @@ class HangoutsMq(Mq):
             LOG.error("Failed to connect and/or subscribe to mqtt: %s", e)
 
     def unsubscribe(self):
+        LOG.info("Unsubscribing from mq client")
         try:
             self._mq_client.unsubscribe(self._mq_sub_topic)
             self._mq_client.loop_stop()
@@ -65,11 +67,13 @@ class HangoutsMq(Mq):
 
     def publish(self, payload):
         try:
-            self._mq_client.publish(
+            LOG.info("Publishing to topic: %s", self._mq_pub_topic)
+            rc = self._mq_client.publish(
                 topic=self._mq_pub_topic,
                 payload=payload['message'],
                 qos=self._mq_qos,
                 retain=False
             )
+            LOG.info("Publishing to topic: %s returned rc: %s", self._mq_pub_topic, str(rc))
         except Exception as e:
             LOG.error("Failed to publish to mqtt: %s", e)

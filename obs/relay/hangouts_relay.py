@@ -1,6 +1,7 @@
 # pylint: disable=attribute-defined-outside-init
 """ Google Hangouts Relay """
 
+import os
 import logging
 import asyncio
 import threading
@@ -18,7 +19,7 @@ class HangoutsRelay(Relay):
     RELAY_ARG_WHITELIST = ['auth_token_path', 'relay_client_id', 'hangouts_conversation_id']
 
     def __init__(self, auth_token_path, relay_client_id, hangouts_conversation_id, mq_client):
-        self._auth_token_path = auth_token_path
+        self._auth_token_path = os.path.expanduser(auth_token_path)
         self._relay_client_id = relay_client_id
         self._hangouts_conversation_id = hangouts_conversation_id
         self._mq_client = mq_client
@@ -32,8 +33,16 @@ class HangoutsRelay(Relay):
         """
         Called to run this module. This is blocking for the life of the application in order to keep clients alive
         """
+        LOG.info("Running relay")
         self._init_sub_client()
         self._connect()
+
+    def stop(self):
+        """ Called to stop this module. Should do any relay clean up here. """
+        LOG.info("Stopping relay")
+        self._mq_client.unsubscribe()
+        if self._client:
+            self._client.disconnect()
 
     def _connect(self):
         """
@@ -48,15 +57,15 @@ class HangoutsRelay(Relay):
         client.on_connect.add_observer(self._on_connect)
         client.on_state_update.add_observer(self._on_state_update)
 
-        self.client = client
-        loop.run_until_complete(self.client.connect())
+        self._client = client
+        loop.run_until_complete(self._client.connect())
         # client.on_connect
         # client.on_disconnect
         # client.on_reconnect
 
     def _on_connect(self):
         """ Log client info on hangups client connect """
-        self_info = hangups.hangouts_pb2.GetSelfInfoRequest(request_header=self.client.get_request_header(),)
+        self_info = hangups.hangouts_pb2.GetSelfInfoRequest(request_header=self._client.get_request_header(),)
         LOG.info("Hangouts self info: " + str(self_info))
 
     def _on_state_update(self, state_update):
@@ -65,7 +74,7 @@ class HangoutsRelay(Relay):
         new messages.
         """
         LOG.debug("state_update: " + str(state_update))
-        if state_update.HasField('conversation') and self._is_not_duplicate(state_update):
+        if state_update.HasField('conversation') and HangoutsRelay._is_not_duplicate(state_update):
             segments = list(state_update.event_notification.event.chat_message.message_content.segment)
             self.relay_in({"message": "".join([x.text for x in segments])})
 
@@ -90,12 +99,12 @@ class HangoutsRelay(Relay):
         """ Builds request to send as Hangouts message """
         LOG.info("relay_out for payload")
         request = hangups.hangouts_pb2.SendChatMessageRequest(
-            request_header=self.client.get_request_header(),
+            request_header=self._client.get_request_header(),
             event_request_header=hangups.hangouts_pb2.EventRequestHeader(
                 conversation_id=hangups.hangouts_pb2.ConversationId(
                     id=self._hangouts_conversation_id
                 ),
-                client_generated_id=self.client.get_client_generated_id(),
+                client_generated_id=self._client.get_client_generated_id(),
             ),
             message_content=hangups.hangouts_pb2.MessageContent(
                 segment=[hangups.ChatMessageSegment(payload["message"]).serialize()],
@@ -108,13 +117,14 @@ class HangoutsRelay(Relay):
         """ hangups logic for sending a message """
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        loop.run_until_complete(self.client.send_chat_message(request))
+        loop.run_until_complete(self._client.send_chat_message(request))
         loop.close()
 
     def relay_in(self, payload):
         """ Publishing client that publishes and disconnects from mq service """
         LOG.info("relay_in for payload")
-        if self.client:
+        if self._client:
+            LOG.info("mq client found, publishing")
             self._mq_client.publish(payload)
         else:
             raise Exception("Relay has not yet been run, call run()")
