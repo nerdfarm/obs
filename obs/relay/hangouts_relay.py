@@ -124,6 +124,7 @@ class HangoutsRelay(Relay):
         """ Publishing client that publishes and disconnects from mq service """
         LOG.info("relay_in for payload")
         if self._client:
+            LOG.info("mq client found, publishing")
             self._mq_client.publish(payload)
         else:
             raise Exception("Relay has not yet been run, call run()")

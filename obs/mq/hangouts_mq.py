@@ -67,11 +67,13 @@ class HangoutsMq(Mq):
 
     def publish(self, payload):
         try:
-            self._mq_client.publish(
+            LOG.info("Publishing to topic: %s", self._mq_pub_topic)
+            rc = self._mq_client.publish(
                 topic=self._mq_pub_topic,
                 payload=payload['message'],
                 qos=self._mq_qos,
                 retain=False
             )
+            LOG.info("Publishing to topic: %s returned rc: %s", self._mq_pub_topic, str(rc))
         except Exception as e:
             LOG.error("Failed to publish to mqtt: %s", e)
