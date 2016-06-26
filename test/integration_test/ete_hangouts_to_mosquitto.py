@@ -74,7 +74,6 @@ def send_hangouts_message_loop(auth_token_path, conversation_id, test_send_messa
 
     cookies = hangups.get_auth_stdin(auth_token_path)
     client = hangups.Client(cookies)
-    client.on_state_update.add_observer(functools.partial(hangouts_receiver_state, messages=[test_send_message]))
     thread = threading.Timer(5, hangups_send_hangouts_message, args=(client, conversation_id, test_send_message,))
     thread.start()
     LOG.info("Connecting hangups client")
@@ -102,11 +101,6 @@ def hangups_send_hangouts_message(sender, conversation_id, message):
     loop.run_until_complete(sender.send_chat_message(request))
     loop.close()
     sender.disconnect()
-
-
-def hangouts_receiver_state(state_update, messages):
-    segments = list(state_update.event_notification.event.chat_message.message_content.segment)
-    messages.append("".join([x.text for x in segments]))
 
 
 def assert_message(client, user_data, msg, message2):
