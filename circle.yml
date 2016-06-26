@@ -17,6 +17,6 @@ dependencies:
 test:
   pre:
     - mosquitto -d -c ~/$MOSQUITTO_CONF
-  override:
-    - python3 -m nose
-    - python3 -m test.integration_test.ete_mosquitto_hangouts --config="~/$TEST_CONFIG_NAME" --auth_token_path="~/$TEST_HANGOUTS_AUTH_TOKEN_NAME" --conversation_id="$HANGOUTS_CONVERSATION_ID"
+#  override:
+#    - python3 -m nose
+#    - python3 -m test.integration_test.ete_mosquitto_hangouts --config="~/$TEST_CONFIG_NAME" --auth_token_path="~/$TEST_HANGOUTS_AUTH_TOKEN_NAME" --conversation_id="$HANGOUTS_CONVERSATION_ID"
