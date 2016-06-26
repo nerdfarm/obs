@@ -1,0 +1,14 @@
+relay:
+  - relay_module: "obs.relay.hangouts_relay"
+    relay_class_name: "HangoutsRelay"
+    relay_client_id: "peter"
+    mq_module: "obs.mq.hangouts_mq"
+    mq_class_name: "HangoutsMq"
+    mq_host: "localhost"
+    mq_port: 1883
+    mq_qos: 2
+    mq_client_id: "hangouts_client"
+    mq_pub_topic: "obs/hangouts_to_pub"
+    mq_sub_topic: "obs/hangouts_to_sub"
+    auth_token_path: "a_path"
+    hangouts_conversation_id: "an_id"
