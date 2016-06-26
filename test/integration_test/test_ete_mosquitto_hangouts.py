@@ -3,7 +3,10 @@ from unittest import TestCase
 import os
 import subprocess
 
+from nose.plugins.attrib import attr
 
+
+@attr(speed='slow')
 class TestEteMosquittoHangouts(TestCase):
 
     def test_ete_mosquitto_hangouts(self):
