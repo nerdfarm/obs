@@ -33,6 +33,7 @@ def main(argv):
     obs_main_thread = threading.Thread(target=functools.partial(obs_main, argv=['--config=' + config_path]))
     obs_main_thread.setDaemon(True)
     obs_main_thread.start()
+    time.sleep(5)
 
     try:
         LOG.info("Starting test_hangouts_message_to_mq")
@@ -41,10 +42,13 @@ def main(argv):
         LOG.info("Starting test_hangouts_message_to_mq mq_client")
         mq_client = mqtt.Client(client_id="test_mq_client", clean_session=False)
 
-        # mq_client.on_message = functools.partial(assert_message, message2=test_send_message)
-        mq_client.on_message = assert_message
-        mq_client.connect(host="localhost", port=1883)
-        mq_client.subscribe(topic="obs/hangouts_to_pub", qos=0)
+        mq_client.on_message = functools.partial(assert_message, message2=test_send_message)
+        rc = mq_client.connect(host="localhost", port=1883)
+        LOG.info("MQ client connect returned rc: %s", str(rc))
+        if int(rc) is not 0:
+            LOG.info("Failed to connect to mq host")
+            sys.exit(1)
+        mq_client.subscribe(topic="obs/hangouts_to_pub", qos=2)
         client_thread = threading.Thread(target=mq_client.loop_forever)
         client_thread.setDaemon(True)
         client_thread.start()
@@ -56,36 +60,12 @@ def main(argv):
         )
         thread.setDaemon(True)
         thread.start()
-
-
-
-        # time.sleep(10)
-        # mq_client.unsubscribe("obs/hangouts_to_pub")
-        # mq_client.loop_stop()
-        # mq_client.disconnect()
-
-        # test_hangouts_message_to_mq(
-        #     auth_token_path=os.path.expanduser(auth_token_path),
-        #     topic="obs/hangouts_to_pub",
-        #     conversation_id=conversation_id
-        # )
-    except SystemExit:
-        sys.exit(0)
     except Exception as error:
         LOG.error("test_hangouts_message_to_mq failed: %s" + str(error))
         sys.exit(1)
 
     time.sleep(20)
     sys.exit(1)
-
-
-# def test_hangouts_message_to_mq(
-#         auth_token_path,
-#         topic,
-#         conversation_id,
-#         mq_client_id='test_send_hangouts',
-#         host='localhost',
-#         port=1883):
 
 
 def send_hangouts_message_loop(auth_token_path, conversation_id, test_send_message):
@@ -129,16 +109,14 @@ def hangouts_receiver_state(state_update, messages):
     messages.append("".join([x.text for x in segments]))
 
 
-def assert_message(client, user_data, msg):
+def assert_message(client, user_data, msg, message2):
     received_message = msg.payload.decode(encoding='utf-8', errors='ignore')
     LOG.info(received_message)
-    # LOG.info("Message success, received_message: %s, message to compare to: %s", received_message, message2)
-    os._exit(0)
-    # if received_message == message2:
-    #     LOG.info("Message success, received_message: %s, message to compare to: %s", received_message, message2)
-    #     os._exit(0)
-    # else:
-    #     raise AssertionError("Message1: %s, and Message2: %s differ", msg, message2)
+    if received_message == message2:
+        LOG.info("Message success, received_message: %s, message to compare to: %s", received_message, message2)
+        os._exit(0)
+    else:
+        raise AssertionError("Message1: %s, and Message2: %s differ", msg, message2)
 
 
 if __name__ == "__main__":
