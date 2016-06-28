@@ -6,7 +6,7 @@ obs
 
 ``obs`` is a service to pass messages between chat services (e.g., IRC, Google Hangouts) and message brokers (e.g., `mosquitto <http://mosquitto.org>`_).
 
-Currently used with ``mosquito`` as a message broker for passing messages between IRC (via ZNC modules) and Google Hangouts (via `hangups <https://github.com/tdryer/hangups>`_) for two-way IRC on for your phone.
+Currently used with ``mosquito`` as a message broker for passing messages between IRC (via ZNC modules) and Google Hangouts (via `hangups <https://github.com/tdryer/hangups>`_) on your phone.
 
 License
 =======
