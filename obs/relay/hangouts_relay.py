@@ -78,7 +78,8 @@ class HangoutsRelay(Relay):
         new messages.
         """
         LOG.debug("state_update: " + str(state_update))
-        if state_update.HasField('conversation') and HangoutsRelay._is_not_duplicate(state_update):
+        if state_update.HasField('conversation') and \
+                HangoutsRelay._is_in_conversation(state_update, self._hangouts_conversation_id):
             segments = list(state_update.event_notification.event.chat_message.message_content.segment)
             self.relay_in({"message": "".join([x.text for x in segments])})
 
@@ -98,6 +99,12 @@ class HangoutsRelay(Relay):
             state_update.event_notification.event.sender_id.HasField('chat_id') and \
             str(state_update.event_notification.event.self_event_state.user_id.chat_id) != \
             str(state_update.event_notification.event.sender_id.chat_id)
+
+    @staticmethod
+    def _is_in_conversation(state_update, conversation_id):
+        """ Only relay chats in the conversation_id configured for this relay """
+        return HangoutsRelay._is_not_duplicate(state_update) and \
+            str(state_update.event_notification.event.sender_id.chat_id) == str(conversation_id)
 
     def relay_out(self, payload):
         """ Builds request to send as Hangouts message """
