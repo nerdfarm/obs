@@ -93,6 +93,8 @@ class HangoutsRelay(Relay):
         return state_update.HasField('event_notification') and \
             state_update.event_notification.HasField('event') and \
             state_update.event_notification.event.HasField('self_event_state') and \
+            state_update.event_notification.event.HasField('conversation_id') and \
+            state_update.event_notification.event.conversation_id.HasField('id') and \
             state_update.event_notification.event.self_event_state.HasField('user_id') and \
             state_update.event_notification.event.self_event_state.user_id.HasField('chat_id') and \
             state_update.event_notification.event.HasField('sender_id') and \
@@ -103,8 +105,9 @@ class HangoutsRelay(Relay):
     @staticmethod
     def _is_in_conversation(state_update, conversation_id):
         """ Only relay chats in the conversation_id configured for this relay """
-        return HangoutsRelay._is_not_duplicate(state_update) and \
-            str(state_update.event_notification.event.sender_id.chat_id) == str(conversation_id)
+        received_chat_id = str(state_update.event_notification.event.conversation_id.id)
+        LOG.info("Received conversation id: %s", received_chat_id)
+        return HangoutsRelay._is_not_duplicate(state_update) and received_chat_id == str(conversation_id)
 
     def relay_out(self, payload):
         """ Builds request to send as Hangouts message """
