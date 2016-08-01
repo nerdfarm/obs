@@ -26,6 +26,7 @@ class HangoutsRelay(Relay):
         super(HangoutsRelay, self).__init__()
 
     def get_relay_client_id(self):
+        """ Return relay_client_id """
         return self._relay_client_id
 
     def _init_sub_client(self):

@@ -1,3 +1,4 @@
+# pylint: disable=undefined-loop-variable
 """ Entry point for obs """
 
 import sys
@@ -47,7 +48,8 @@ def main(argv):
     finally:
         LOG.info("Shutting down")
         for relay_process in relay_processes:
-            relay_process.terminate()
+            if relay_process:
+                relay_process.terminate()
         sys.exit(0)
 
 
