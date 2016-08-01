@@ -25,6 +25,9 @@ class HangoutsRelay(Relay):
         self._mq_client = mq_client
         super(HangoutsRelay, self).__init__()
 
+    def get_relay_client_id(self):
+        return self._relay_client_id
+
     def _init_sub_client(self):
         """ Initialize the mq subscribing client """
         self._mq_client.subscribe(on_relay_out=self.relay_out)

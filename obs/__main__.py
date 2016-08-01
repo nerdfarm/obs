@@ -3,7 +3,8 @@
 import sys
 import getopt
 import logging
-import threading
+import multiprocessing
+import traceback
 
 import obs.config as ObsConfig
 
@@ -18,7 +19,7 @@ def main(argv):
         format='[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s'
     )
 
-    loaded_relays = []
+    relay_processes = []
     try:
         parsed_args = parse_config_args(argv, ['config='])
         config_path = parsed_args['--config']
@@ -30,18 +31,23 @@ def main(argv):
         relays = ObsConfig.parse_obs_config(config_path)
         LOG.info("Parsed %s %s", str(len(relays)), "relay" if len(relays) == 1 else "relays")
         for relay in relays:
-            loaded_relays.append(relay)
-            thread = threading.Thread(relay.run())
-            thread.setDaemon(True)
-            thread.start()
+            process = multiprocessing.Process(target=relay.run)
+            relay_processes.append(process)
+            process.daemon = True
+            process.start()
+            LOG.info("Loaded relay with relay_client_id: %s", relay.get_relay_client_id())
+        for relay_process in relay_processes:
+            relay_process.join()
     except getopt.GetoptError as error:
         LOG.error("Must supply config YAML path as first argument: %s", error)
+        traceback.format_exc()
     except Exception as exception:
         LOG.error("Caught exception: %s", exception)
+        traceback.format_exc()
     finally:
         LOG.info("Shutting down")
-        for loaded_relay in loaded_relays:
-            loaded_relay.stop()
+        for relay_process in relay_processes:
+            relay_process.terminate()
         sys.exit(0)
 
 
