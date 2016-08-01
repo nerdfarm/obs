@@ -65,6 +65,7 @@ def main(argv):
         sys.exit(1)
 
     time.sleep(20)
+    LOG.error("Failed to send hangouts_to_mosquitto message")
     sys.exit(1)
 
 

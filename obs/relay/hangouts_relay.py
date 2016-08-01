@@ -25,6 +25,10 @@ class HangoutsRelay(Relay):
         self._mq_client = mq_client
         super(HangoutsRelay, self).__init__()
 
+    def get_relay_client_id(self):
+        """ Return relay_client_id """
+        return self._relay_client_id
+
     def _init_sub_client(self):
         """ Initialize the mq subscribing client """
         self._mq_client.subscribe(on_relay_out=self.relay_out)
@@ -74,7 +78,8 @@ class HangoutsRelay(Relay):
         new messages.
         """
         LOG.debug("state_update: " + str(state_update))
-        if state_update.HasField('conversation') and HangoutsRelay._is_not_duplicate(state_update):
+        if state_update.HasField('conversation') and \
+                HangoutsRelay._is_in_conversation(state_update, self._hangouts_conversation_id):
             segments = list(state_update.event_notification.event.chat_message.message_content.segment)
             self.relay_in({"message": "".join([x.text for x in segments])})
 
@@ -88,12 +93,21 @@ class HangoutsRelay(Relay):
         return state_update.HasField('event_notification') and \
             state_update.event_notification.HasField('event') and \
             state_update.event_notification.event.HasField('self_event_state') and \
+            state_update.event_notification.event.HasField('conversation_id') and \
+            state_update.event_notification.event.conversation_id.HasField('id') and \
             state_update.event_notification.event.self_event_state.HasField('user_id') and \
             state_update.event_notification.event.self_event_state.user_id.HasField('chat_id') and \
             state_update.event_notification.event.HasField('sender_id') and \
             state_update.event_notification.event.sender_id.HasField('chat_id') and \
             str(state_update.event_notification.event.self_event_state.user_id.chat_id) != \
             str(state_update.event_notification.event.sender_id.chat_id)
+
+    @staticmethod
+    def _is_in_conversation(state_update, conversation_id):
+        """ Only relay chats in the conversation_id configured for this relay """
+        received_chat_id = str(state_update.event_notification.event.conversation_id.id)
+        LOG.info("Received conversation id: %s", received_chat_id)
+        return HangoutsRelay._is_not_duplicate(state_update) and received_chat_id == str(conversation_id)
 
     def relay_out(self, payload):
         """ Builds request to send as Hangouts message """
